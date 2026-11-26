@@ -18,12 +18,15 @@ The application connects to my Spotify account and pulls from my listening histo
 ## Tech Stack
 
 - **Language:** Java
-- **Libraries:** java.net.http.HttpClient, Gson, dotenv-java
+- **Libraries:** java.net.http.HttpClient, gson-2.11.0.jar, dotenv-java-3.0.2.jar
 - **External tools:** Spotify Web API
 
 ## Setup
 
 To run this project locally, you need Java installed on your machine as well as developer credentials from Spotify Developer. 
+Download gson-2.11.0.jar and dotenv-java-3.0.2.jar
+Copy \env.example's format into \.env and add your specific data. 
+ 
 ```bash
 git clone [https://github.com/ryansharma21/spotify-data-analyzer.git](https://github.com/ryansharma21/spotify-data-analyzer.git)
 cd spotify-data-analyzer
