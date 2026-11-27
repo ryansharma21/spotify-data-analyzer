@@ -83,33 +83,77 @@ public class Main {
 
 		JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
 		String token = jsonObject.get("access_token").getAsString();
+		
+		getTopArtists(token);
+		getTopTracks(token);
+	}
+	//help finish this method taking the code from the main method and basically putting it in here
+	public static void getTopArtists(String token) throws Exception {
 		HttpRequest userRequest = HttpRequest.newBuilder()
 				.uri(URI.create("https://api.spotify.com/v1/me/top/artists?limit=20"))
 				.header("Authorization", "Bearer " + token)
 				.GET()
 				.build();
 
-		HttpClient userClient = HttpClient.newHttpClient(); 
-		HttpResponse<String> userResponse = userClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
+		HttpClient userClient = HttpClient.newHttpClient();
+		HttpResponse<String> userResponse = userClient.send(
+				userRequest, HttpResponse.BodyHandlers.ofString());
 
-		//System.out.println("Status: " + userResponse.statusCode());
-		//System.out.println("Body: " + userResponse.body());
-
-
-		JsonObject topArtistsJson = JsonParser.parseString(userResponse.body()).getAsJsonObject();
+		JsonObject topArtistsJson = JsonParser.parseString(userResponse.body())
+				.getAsJsonObject();
 		JsonArray itemsArray = topArtistsJson.getAsJsonArray("items");
 
-		/*
-		 * the data looks like:
-		 * items:
-		 * {name - "Artist name", popularity - 80, etc}
-		 */
 		System.out.println("Your Top Artists:");
 		for (int i = 0; i < itemsArray.size(); i++) {
 			JsonObject artist = itemsArray.get(i).getAsJsonObject();
 			String name = artist.get("name").getAsString();
-			System.out.println((i + 1) + "." + name);
-			//System.out.println(artist.keySet() + "\n");
+			System.out.println((i + 1) + ". " + name);
+		}
+	}
+
+	public static void getTopTracks(String token) throws Exception {
+		HttpRequest userRequest = HttpRequest.newBuilder()
+				.uri(URI.create("https://api.spotify.com/v1/me/top/tracks?limit=20"))
+				.header("Authorization", "Bearer " + token)
+				.GET()
+				.build();
+		HttpClient userClient = HttpClient.newHttpClient();
+		HttpResponse<String> userResponse = userClient.send(
+				userRequest, HttpResponse.BodyHandlers.ofString());
+
+		JsonObject topTracksJson = JsonParser.parseString(userResponse.body())
+				.getAsJsonObject();
+		JsonArray itemsArray = topTracksJson.getAsJsonArray("items");
+
+		//print all the keys that are in the arraything
+		
+		System.out.println("Your Top Tracks:");
+		for (int i = 0; i < itemsArray.size(); i++) {
+			JsonObject track = itemsArray.get(i).getAsJsonObject();
+			String name = track.get("name").getAsString();
+
+			JsonArray artists = track.getAsJsonArray("artists");
+			String artistNames = "";
+			for (int j = 0; j < artists.size(); j++) {
+				JsonObject artist = artists.get(j).getAsJsonObject();
+				artistNames += artist.get("name").getAsString();
+				if (j != artists.size() - 1) {
+					artistNames += ", ";
+				}
+			}
+			
+			long duration = track.get("duration_ms").getAsLong();
+			long minutes = duration / 60000;
+			long seconds = (duration % 60000) / 1000;
+
+			String trackLength = ""; 
+			trackLength += minutes + ":"; 
+			if (seconds < 10) {
+				trackLength += "0"; 
+			}
+			trackLength += seconds;
+			System.out.println((i + 1) + ". " + name + " by " + artistNames + " (" + trackLength + ")");
+			
 		}
 	}
 }
