@@ -1,4 +1,4 @@
-# Project Name
+# Spotify Data Analyzer
 
 A Java command line application that pulls data form the Spotify API to give user data and calculate statistics.
 
