@@ -3,6 +3,8 @@
  * javac -cp "lib/*" -d bin src/Main.java
  * java -cp "bin:lib/*" Main
  */
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.OutputStream;
 import com.sun.net.httpserver.HttpServer;
@@ -14,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import com.google.gson.JsonArray;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -75,7 +78,38 @@ public class Main {
 		
 		HttpClient client = HttpClient.newHttpClient();
 		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-		System.out.println("Status: " + response.statusCode());
-		System.out.println("Body: " + response.body());
+		//System.out.println("Status: " + response.statusCode());
+		//System.out.println("Body: " + response.body());
+
+		JsonObject jsonObject = JsonParser.parseString(response.body()).getAsJsonObject();
+		String token = jsonObject.get("access_token").getAsString();
+		HttpRequest userRequest = HttpRequest.newBuilder()
+				.uri(URI.create("https://api.spotify.com/v1/me/top/artists?limit=20"))
+				.header("Authorization", "Bearer " + token)
+				.GET()
+				.build();
+
+		HttpClient userClient = HttpClient.newHttpClient(); 
+		HttpResponse<String> userResponse = userClient.send(userRequest, HttpResponse.BodyHandlers.ofString());
+
+		//System.out.println("Status: " + userResponse.statusCode());
+		//System.out.println("Body: " + userResponse.body());
+
+
+		JsonObject topArtistsJson = JsonParser.parseString(userResponse.body()).getAsJsonObject();
+		JsonArray itemsArray = topArtistsJson.getAsJsonArray("items");
+
+		/*
+		 * the data looks like:
+		 * items:
+		 * {name - "Artist name", popularity - 80, etc}
+		 */
+		System.out.println("Your Top Artists:");
+		for (int i = 0; i < itemsArray.size(); i++) {
+			JsonObject artist = itemsArray.get(i).getAsJsonObject();
+			String name = artist.get("name").getAsString();
+			System.out.println((i + 1) + "." + name);
+			//System.out.println(artist.keySet() + "\n");
+		}
 	}
 }
